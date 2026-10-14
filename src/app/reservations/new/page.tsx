@@ -23,31 +23,6 @@ async function NewReservationContent() {
               Select a resource, choose a date and time, and create your reservation.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              ["1", "Select Resource", "Choose a workspace"],
-              ["2", "Date & Time", "Check availability"],
-              ["3", "Confirm", "Complete booking"],
-            ].map(([step, label, caption], index) => (
-              <div key={step} className="flex items-center gap-3">
-                <span
-                  className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ${
-                    index === 0
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {step}
-                </span>
-                <span>
-                  <span className="block text-sm font-bold text-slate-950">
-                    {label}
-                  </span>
-                  <span className="block text-xs text-slate-500">{caption}</span>
-                </span>
-              </div>
-            ))}
-          </div>
         </header>
         {result.success ? (
           <BookingForm resources={result.data} />

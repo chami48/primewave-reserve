@@ -11,6 +11,7 @@ export type Reservation = {
   status: ReservationStatus;
   created_at: string;
   resources?: Resource | null;
+  users?: { full_name?: string | null } | null;
 };
 
 export type ReservationInput = {

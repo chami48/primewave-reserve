@@ -3,17 +3,14 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import {
-  Bell,
-  ChevronDown,
-  LogOut,
-  Search,
-} from "lucide-react";
+import { ChevronDown, LogOut, Search } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
 import { MobileNav, type NavLinkData } from "@/components/mobile-nav";
 import { SidebarNav, type SidebarLink } from "@/components/sidebar-nav";
+import { NotificationBell } from "@/components/notification-bell";
 
 type Props = {
   title: string;
@@ -65,7 +62,7 @@ export async function AppShell({
 
   const { data: profile } = await supabase
     .from("users")
-    .select("role, full_name")
+    .select("id, role, full_name")
     .eq("auth_user_id", user.id)
     .single();
 
@@ -74,6 +71,21 @@ export async function AppShell({
   const brandHref = isAdmin ? "/admin/dashboard" : "/dashboard";
   const displayName = profile?.full_name || user.email;
   const avatarInitials = initials(profile?.full_name, user.email);
+  const { count: notificationCount } = await supabase
+    .from("reservations")
+    .select("id", { count: "exact", head: true })
+    .eq(isAdmin ? "status" : "user_id", isAdmin ? "pending" : profile?.id)
+    .neq("status", "cancelled")
+    .gte("start_time", new Date().toISOString());
+  const notifications = notificationCount
+    ? [{
+        id: "reservation-activity",
+        title: isAdmin ? "Reservations need review" : "Upcoming reservation",
+        detail: isAdmin
+          ? `${notificationCount} booking request${notificationCount === 1 ? "" : "s"} waiting for approval.`
+          : `You have ${notificationCount} upcoming booking${notificationCount === 1 ? "" : "s"}.`,
+      }]
+    : [];
 
   // Serializable version for the client MobileNav component
   const mobileLinks: NavLinkData[] = links.map(({ href, label, iconName }) => ({
@@ -162,11 +174,9 @@ export async function AppShell({
                   />
                 </div>
               </div>
+              <ThemeToggle />
               <div className="hidden items-center gap-4 sm:flex">
-                <button className="relative inline-flex size-10 items-center justify-center rounded-full text-slate-900 hover:bg-slate-100">
-                  <Bell className="size-5" />
-                  <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full bg-red-500 ring-2 ring-white" />
-                </button>
+                <NotificationBell notifications={notifications} />
                 <span className="h-8 w-px bg-slate-200" />
                 <span className="flex size-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
                   {avatarInitials}

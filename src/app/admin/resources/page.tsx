@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getResources } from "@/app/actions/resources";
 import { createClient } from "@/lib/supabase/server";
+import { AppShell } from "@/components/app-shell";
 import { ResourceAdminPanel } from "./resource-admin-panel";
 
 async function requireAdmin() {
@@ -36,7 +37,7 @@ async function AdminResourcesContent() {
   const result = await getResources();
 
   return (
-    <main className="primewave-bg min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <AppShell title="Resource Management" eyebrow="PrimeWave Reserve Admin">
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -59,7 +60,7 @@ async function AdminResourcesContent() {
               View catalog
             </Link>
             <Link
-              href="/dashboard"
+              href="/admin/dashboard"
               className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 transition hover:bg-blue-700"
             >
               Dashboard
@@ -80,7 +81,7 @@ async function AdminResourcesContent() {
           )}
         </div>
       </div>
-    </main>
+    </AppShell>
   );
 }
 

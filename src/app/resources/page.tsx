@@ -4,10 +4,13 @@ import { getResources } from "@/app/actions/resources";
 import { AppShell } from "@/components/app-shell";
 import { ResourceCatalog } from "./resource-catalog";
 
-async function ResourcesContent() {
+async function ResourcesContent({ searchParams }: PageProps<"/resources">) {
   await connection();
 
   const result = await getResources();
+  const params = await searchParams;
+  const selectedType = typeof params.type === "string" ? params.type : "all";
+  const initialType = result.success && result.data.some((resource) => resource.type === selectedType) ? selectedType : "all";
 
   return (
     <AppShell title="Resources">
@@ -26,7 +29,7 @@ async function ResourcesContent() {
           </div>
         </header>
         {result.success ? (
-          <ResourceCatalog resources={result.data} />
+            <ResourceCatalog key={initialType} resources={result.data} initialType={initialType} />
         ) : (
           <section className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-sm">
             <h2 className="text-lg font-semibold text-slate-950">
@@ -40,7 +43,7 @@ async function ResourcesContent() {
   );
 }
 
-export default function ResourcesPage() {
+export default function ResourcesPage(props: PageProps<"/resources">) {
   return (
     <Suspense
       fallback={
@@ -51,7 +54,7 @@ export default function ResourcesPage() {
         </main>
       }
     >
-      <ResourcesContent />
+      <ResourcesContent {...props} />
     </Suspense>
   );
 }

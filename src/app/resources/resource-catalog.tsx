@@ -13,6 +13,7 @@ import type { Resource, ResourceStatus } from "@/types/resource";
 
 type Props = {
   resources: Resource[];
+  initialType?: string;
 };
 
 const statusLabels: Record<ResourceStatus, string> = {
@@ -20,9 +21,9 @@ const statusLabels: Record<ResourceStatus, string> = {
   maintenance: "Maintenance",
 };
 
-export function ResourceCatalog({ resources }: Props) {
+export function ResourceCatalog({ resources, initialType = "all" }: Props) {
   const [search, setSearch] = useState("");
-  const [type, setType] = useState("all");
+  const [type, setType] = useState(initialType);
   const [status, setStatus] = useState<"all" | ResourceStatus>("all");
   const [detailsResource, setDetailsResource] = useState<Resource | null>(null);
 

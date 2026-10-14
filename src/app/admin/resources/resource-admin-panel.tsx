@@ -186,12 +186,12 @@ export function ResourceAdminPanel({ resources }: Props) {
               onChange={(event) =>
                 setForm((current) => ({ ...current, name: event.target.value }))
               }
-              className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
+              className="mt-2 block border border-slate-400 bg-white text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 h-11 w-full rounded-xl px-3 text-sm"
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-slate-700">Type</span>
+          <label className="block rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <span className="text-sm font-semibold text-slate-700">Resource type</span>
             <input
               required
               list="resource-types"
@@ -199,7 +199,9 @@ export function ResourceAdminPanel({ resources }: Props) {
               onChange={(event) =>
                 setForm((current) => ({ ...current, type: event.target.value }))
               }
-              className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
+              placeholder="e.g. Meeting Room, Device, Lab"
+              className="mt-2 block h-11 w-full rounded-lg bg-white px-3 text-sm text-slate-950 shadow-sm outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              style={{ border: "1px solid #94a3b8" }}
             />
             <datalist id="resource-types">
               {resourceTypes.map((type) => (
@@ -221,7 +223,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                 }))
               }
               rows={4}
-              className="premium-field mt-2 w-full rounded-xl px-3 py-3 text-sm"
+              className="mt-2 block border border-slate-400 bg-white text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 w-full rounded-xl px-3 py-3 text-sm"
             />
           </label>
 
@@ -287,7 +289,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                       : null,
                   }))
                 }
-                className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
+                className="mt-2 block border border-slate-400 bg-white text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 h-11 w-full rounded-xl px-3 text-sm"
               />
             </label>
 
@@ -301,7 +303,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                     status: event.target.value as ResourceStatus,
                   }))
                 }
-                className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
+                className="mt-2 block border border-slate-400 bg-white text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 h-11 w-full rounded-xl px-3 text-sm"
               >
                 <option value="available">Available</option>
                 <option value="maintenance">Maintenance</option>

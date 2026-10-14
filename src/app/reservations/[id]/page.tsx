@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { getReservationById } from "@/app/actions/reservations";
+import { AppShell } from "@/components/app-shell";
 import { CancelReservationButton } from "../reservation-actions";
 
 function formatDateTime(value: string) {
@@ -17,35 +18,35 @@ async function ReservationDetailContent({ params }: PageProps<"/reservations/[id
   const result = await getReservationById(id);
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <AppShell title="Reservation Details">
       <div className="mx-auto max-w-4xl">
         <header className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              PrimeWave Reserve
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-600">
+              Booking record
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-slate-950">
+            <h2 className="mt-2 text-3xl font-bold text-slate-950">
               Reservation Details
-            </h1>
+            </h2>
           </div>
           <Link
             href="/reservations"
-            className="inline-flex h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700"
+            className="inline-flex h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
           >
             Back
           </Link>
         </header>
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.07)] sm:p-8">
           {result.success ? (
             <div className="space-y-5">
               <div>
-                <p className="text-sm font-semibold text-emerald-700">
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
                   {result.data.resources?.type ?? "Resource"}
                 </p>
-                <h2 className="mt-1 text-2xl font-semibold text-slate-950">
+                <h3 className="mt-1 text-2xl font-semibold text-slate-950">
                   {result.data.resources?.name ?? "Reserved resource"}
-                </h2>
+                </h3>
                 <p className="mt-2 text-sm text-slate-600">
                   {result.data.resources?.description ?? "No description provided."}
                 </p>
@@ -102,7 +103,7 @@ async function ReservationDetailContent({ params }: PageProps<"/reservations/[id
           )}
         </section>
       </div>
-    </main>
+    </AppShell>
   );
 }
 

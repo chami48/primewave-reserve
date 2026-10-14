@@ -103,6 +103,7 @@ function logDatabaseError(context: string, error: SafeDatabaseError) {
 function revalidateResourcePages() {
   revalidatePath("/resources");
   revalidatePath("/admin/resources");
+  revalidatePath("/dashboard");
 }
 
 export async function getResources(): Promise<ResourceActionResult<Resource[]>> {

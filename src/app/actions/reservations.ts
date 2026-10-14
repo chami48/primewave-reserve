@@ -55,6 +55,9 @@ function friendlyDbError(error: DbError, fallback: string) {
   }
 
   if (error.code === "23514") {
+    if (error.message?.includes("reservations_status_check")) {
+      return "Reservation status rules are out of date. Apply the latest Supabase migration.";
+    }
     return "The reservation time range is invalid.";
   }
 
@@ -310,6 +313,7 @@ export async function createReservation(
 
   revalidatePath("/reservations");
   revalidatePath("/reservations/new");
+  revalidatePath("/dashboard");
   return {
     success: true,
     data: data as unknown as Reservation,
@@ -359,7 +363,27 @@ export async function getAllReservationsForAdmin(): Promise<
     return { success: false, error: "Reservations could not be loaded." };
   }
 
-  return { success: true, data: (data ?? []) as unknown as Reservation[] };
+  const rows = data ?? [];
+  const userIds = Array.from(new Set(rows.map((reservation) => reservation.user_id)));
+  const { data: users, error: usersError } = userIds.length
+    ? await supabase.from("users").select("id, full_name").in("id", userIds)
+    : { data: [], error: null };
+
+  if (usersError) {
+    logReservationError("admin reservation users lookup failed", usersError);
+  }
+
+  const userMap = new Map(
+    (users ?? []).map((user) => [user.id, { full_name: user.full_name }])
+  );
+
+  return {
+    success: true,
+    data: rows.map((reservation) => ({
+      ...reservation,
+      users: userMap.get(reservation.user_id) ?? null,
+    })) as unknown as Reservation[],
+  };
 }
 
 export async function updateReservationStatusForAdmin(
@@ -383,6 +407,7 @@ export async function updateReservationStatusForAdmin(
   }
 
   revalidatePath("/admin/reservations");
+  revalidatePath("/dashboard");
   revalidatePath("/reservations");
   revalidatePath(`/reservations/${id}`);
   return { success: true, data: { id, status }, message: "Reservation updated." };
@@ -457,5 +482,6 @@ export async function cancelReservation(
 
   revalidatePath("/reservations");
   revalidatePath(`/reservations/${id}`);
+  revalidatePath("/dashboard");
   return { success: true, data: { id }, message: "Reservation cancelled." };
 }

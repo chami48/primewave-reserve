@@ -33,7 +33,7 @@ async function AdminReservationsContent() {
               Resources
             </Link>
             <Link
-              href="/dashboard"
+              href="/admin/dashboard"
               className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-blue-700"
             >
               Dashboard

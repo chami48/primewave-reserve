@@ -33,7 +33,7 @@ async function AdminUsersContent() {
   const supabase = await requireAdmin();
   const { data: users, error } = await supabase
     .from("users")
-    .select("id, full_name, email, role, created_at")
+    .select("id, full_name, role, created_at")
     .order("created_at", { ascending: false });
 
   const rows = users ?? [];
@@ -58,15 +58,15 @@ async function AdminUsersContent() {
         <section className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">Total Users</p>
-            <p className="mt-2 text-3xl font-bold text-slate-950">{rows.length}</p>
+            <p className="mt-2 text-3xl font-bold text-slate-950">{error ? "—" : rows.length}</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">Employees</p>
-            <p className="mt-2 text-3xl font-bold text-slate-950">{employees}</p>
+            <p className="mt-2 text-3xl font-bold text-slate-950">{error ? "—" : employees}</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">Admins</p>
-            <p className="mt-2 text-3xl font-bold text-slate-950">{admins}</p>
+            <p className="mt-2 text-3xl font-bold text-slate-950">{error ? "—" : admins}</p>
           </div>
         </section>
 
@@ -87,7 +87,7 @@ async function AdminUsersContent() {
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-5 py-3">Full Name</th>
-                    <th className="px-5 py-3">Email</th>
+                    <th className="px-5 py-3">User ID</th>
                     <th className="px-5 py-3">Role</th>
                     <th className="px-5 py-3">Created</th>
                   </tr>
@@ -96,9 +96,9 @@ async function AdminUsersContent() {
                   {rows.map((user) => (
                     <tr key={user.id}>
                       <td className="px-5 py-4 font-semibold text-slate-950">
-                        {user.full_name ?? "Unnamed user"}
+                        {user.full_name?.trim() || "Unnamed user"}
                       </td>
-                      <td className="px-5 py-4 text-slate-600">{user.email}</td>
+                      <td className="px-5 py-4 text-slate-600">{user.id}</td>
                       <td className="px-5 py-4">
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">
                           {user.role}

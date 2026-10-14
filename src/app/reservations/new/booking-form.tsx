@@ -52,6 +52,7 @@ export function BookingForm({ resources }: Props) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<
     { id: string; start_time: string; end_time: string; status: string }[]
@@ -189,6 +190,7 @@ export function BookingForm({ resources }: Props) {
   function checkAvailability() {
     setMessage(null);
     setError(null);
+    setBookingConfirmed(false);
 
     startTransition(async () => {
       const result = await checkResourceAvailability(input());
@@ -216,14 +218,32 @@ export function BookingForm({ resources }: Props) {
         return;
       }
       setMessage("Booking confirmed. You can view it in My Reservations.");
-      setDate("");
-      setStartTime("");
-      setEndTime("");
+      setBookingConfirmed(true);
     });
   }
 
+  const steps = [
+    ["1", "Select Resource", "Choose a workspace", Boolean(resourceId)],
+    ["2", "Date & Time", "Check availability", Boolean(date && startTime && endTime)],
+    ["3", "Confirm", "Complete booking", bookingConfirmed],
+  ] as const;
+
   return (
-    <form onSubmit={submitBooking} className="grid gap-6 xl:grid-cols-[360px_1fr_350px]">
+    <>
+      <div className="mb-7 grid gap-4 sm:grid-cols-3">
+        {steps.map(([step, label, caption, complete]) => (
+          <div key={step} className="flex items-center gap-3">
+            <span className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ${complete ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
+              {step}
+            </span>
+            <span>
+              <span className="block text-sm font-bold text-slate-950">{label}</span>
+              <span className="block text-xs text-slate-500">{caption}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      <form onSubmit={submitBooking} className="grid gap-6 xl:grid-cols-[360px_1fr_350px]">
       <aside className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         {selectedResource ? (
           <div className="space-y-4">
@@ -491,6 +511,7 @@ export function BookingForm({ resources }: Props) {
           <p className="mt-5 text-sm text-slate-600">No available resources found.</p>
         )}
       </aside>
-    </form>
+      </form>
+    </>
   );
 }

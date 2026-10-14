@@ -2,158 +2,116 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
+import { bookingActivity, dashboardDay, dashboardTimeZone } from "@/lib/dashboard";
+import type { DashboardBooking } from "@/lib/dashboard";
+import type { Resource } from "@/types/resource";
+import { BookingActivityChart } from "./booking-activity-chart";
+
+type ResourceSummary = Pick<Resource, "id" | "name" | "type" | "description" | "image_url" | "status">;
+type Booking = DashboardBooking & {
+  resources: { name: string; type: string; image_url: string | null } | { name: string; type: string; image_url: string | null }[] | null;
+};
+
+async function fetchPages<T>(query: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
+  const rows: T[] = [];
+  for (let from = 0; ; from += 1000) {
+    const result = await query(from, from + 999);
+    if (result.error) return { data: rows, error: result.error };
+    rows.push(...(result.data ?? []));
+    if ((result.data?.length ?? 0) < 1000) return { data: rows, error: null };
+  }
+}
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    timeZone: dashboardTimeZone, dateStyle: "medium", timeStyle: "short",
   }).format(new Date(value));
+}
+
+function Panel({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
+  return <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between gap-3"><h3 className="font-bold text-slate-950">{title}</h3>{action}</div>{children}</section>;
+}
+
+function BookingList({ bookings, empty }: { bookings: Booking[]; empty: string }) {
+  return <div className="mt-3 divide-y divide-slate-200">{bookings.length ? bookings.map((booking) => {
+    const resource = Array.isArray(booking.resources) ? booking.resources[0] : booking.resources;
+    return <Link key={booking.id} href={`/reservations/${booking.id}`} className="flex items-center gap-3 py-3">
+      <div className="size-11 shrink-0 rounded-lg bg-slate-100 bg-cover bg-center" style={{ backgroundImage: resource?.image_url ? `url(${resource.image_url})` : undefined }} />
+      <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-slate-950">{resource?.name ?? "Reserved resource"}</p><p className="mt-1 text-xs text-slate-500">{formatDateTime(booking.start_time)} – {new Intl.DateTimeFormat("en", { timeZone: dashboardTimeZone, hour: "numeric", minute: "2-digit" }).format(new Date(booking.end_time))}</p></div>
+      <StatusBadge status={booking.status} />
+    </Link>;
+  }) : <p className="py-8 text-center text-sm text-slate-500">{empty}</p>}</div>;
 }
 
 async function DashboardContent() {
   await connection();
-
   const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) redirect("/login");
+  const { data: profile } = await supabase.from("users").select("id, role, full_name").eq("auth_user_id", user.id).single();
+  if (!profile) redirect("/login");
+  if (profile.role === "admin") redirect("/admin/dashboard");
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("users")
-    .select("id, role, full_name")
-    .eq("auth_user_id", user.id)
-    .single();
-
-  if (!profile) {
-    redirect("/login");
-  }
-
-  const isAdmin = profile.role === "admin";
-
-  const [
-    { count: resourceCount },
-    { count: availableResourceCount },
-    { count: reservationCount },
-    { data: upcomingReservations },
-    { data: featuredResources },
-  ] = await Promise.all([
-    supabase.from("resources").select("id", { count: "exact", head: true }),
-    supabase
-      .from("resources")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "available"),
-    supabase
-      .from("reservations")
-      .select("id", { count: "exact", head: true })
-      .neq("status", "cancelled")
-      .eq(isAdmin ? "status" : "user_id", isAdmin ? "pending" : profile.id),
-    supabase
-      .from("reservations")
-      .select(
-        "id, start_time, end_time, status, resources(name, type, image_url)"
-      )
-      .neq("status", "cancelled")
-      .eq(isAdmin ? "status" : "user_id", isAdmin ? "pending" : profile.id)
-      .gte("start_time", new Date().toISOString())
-      .order("start_time", { ascending: true })
-      .limit(5),
-    supabase
-      .from("resources")
-      .select("id, name, type, description, image_url, capacity, status")
-      .eq("status", "available")
-      .order("created_at", { ascending: false })
-      .limit(3),
+  const now = new Date();
+  const day = dashboardDay(now);
+  const bookingSelect = "id, start_time, end_time, status, resources(name, type, image_url)";
+  const [resourcesResult, upcomingCountResult, upcomingResult, todayResult] = await Promise.all([
+    fetchPages<ResourceSummary>((from, to) => supabase.from("resources").select("id, name, type, description, image_url, status").order("id").range(from, to)),
+    supabase.from("reservations").select("id", { count: "exact", head: true }).eq("user_id", profile.id).in("status", ["pending", "confirmed"]).gte("start_time", now.toISOString()),
+    supabase.from("reservations").select(bookingSelect).eq("user_id", profile.id).in("status", ["pending", "confirmed"]).gte("start_time", now.toISOString()).order("start_time").order("id").limit(3),
+    fetchPages<Booking>((from, to) => supabase.from("reservations").select(bookingSelect).eq("user_id", profile.id).in("status", ["pending", "confirmed"]).lt("start_time", day.end.toISOString()).gt("end_time", day.start.toISOString()).order("start_time").order("id").range(from, to)),
   ]);
 
-  const displayName =
-    profile.full_name || user.email?.split("@")[0] || "there";
-  const today = new Date();
-  const todayBookings = (upcomingReservations ?? []).filter(
-    (reservation) =>
-      new Date(reservation.start_time).toDateString() === today.toDateString()
-  ).length;
-  const todayLabel = new Intl.DateTimeFormat("en", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(today);
+  if ([resourcesResult, upcomingCountResult, upcomingResult, todayResult].some((result) => result.error)) {
+    return <AppShell title="Dashboard"><Panel title="Dashboard could not be loaded"><p className="mt-3 text-sm text-slate-600">Please refresh to try again. Your booking data is currently unavailable.</p></Panel></AppShell>;
+  }
 
-  return (
-    <AppShell title="Dashboard">
-      <div className="mx-auto max-w-[1440px] space-y-5">
-        <header className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Good afternoon, {displayName}!</h2>
-            <p className="mt-1 text-sm text-slate-500">Here&apos;s what&apos;s happening with your workspace today.</p>
-          </div>
-          <p className="hidden text-sm font-medium text-slate-500 sm:block">{todayLabel}</p>
-        </header>
+  const resources = resourcesResult.data;
+  const bookable = resources.filter((resource) => resource.status === "available");
+  const todayBookings = todayResult.data;
+  const categories = Array.from(new Set(resources.map((resource) => resource.type))).sort().map((type) => ({ type, count: resources.filter((resource) => resource.type === type).length }));
+  const featured = bookable.find((resource) => resource.image_url) ?? bookable[0];
+  const localHour = Number(new Intl.DateTimeFormat("en", { timeZone: dashboardTimeZone, hour: "2-digit", hourCycle: "h23" }).format(now));
+  const greeting = localHour < 12 ? "Good morning" : localHour < 18 ? "Good afternoon" : "Good evening";
+  const displayName = profile.full_name || user.email?.split("@")[0] || "there";
+  const todayLabel = new Intl.DateTimeFormat("en", { timeZone: dashboardTimeZone, weekday: "long", month: "short", day: "numeric", year: "numeric" }).format(now);
+  const viewAll = <Link href="/reservations" className="text-xs font-bold text-blue-600">View all →</Link>;
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            ["Total Resources", resourceCount ?? 0, "Across all categories", "bg-blue-50 text-blue-700"],
-            ["Available Now", availableResourceCount ?? 0, "Ready for booking", "bg-emerald-50 text-emerald-700"],
-            ["Upcoming Bookings", reservationCount ?? 0, "Your reservations", "bg-violet-50 text-violet-700"],
-            ["Today&apos;s Bookings", todayBookings, "Scheduled for today", "bg-orange-50 text-orange-700"],
-          ].map(([label, value, note, tone]) => (
-            <div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-start justify-between"><p className="text-sm font-semibold text-slate-500">{label}</p><span className={`rounded-full px-2 py-1 text-xs font-bold ${tone}`}>{label === "Available Now" ? "Ready" : ""}</span></div>
-              <p className="mt-3 text-3xl font-bold text-slate-950">{value}</p><p className="mt-1 text-xs text-slate-500">{note}</p>
-            </div>
-          ))}
+  return <AppShell title="Dashboard">
+    <div className="mx-auto max-w-[1440px] space-y-5">
+      <header className="flex items-end justify-between gap-4"><div><h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{greeting}, {displayName}!</h2><p className="mt-1 text-sm text-slate-500">Here&apos;s what&apos;s happening with your workspace today.</p></div><p className="hidden text-sm font-medium text-slate-500 sm:block">{todayLabel}</p></header>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: "Total Resources", value: resources.length, note: "Across all categories" },
+          { label: "Bookable Resources", value: bookable.length, note: "Operational resources; check time availability" },
+          { label: "Upcoming Bookings", value: upcomingCountResult.count ?? 0, note: "Your pending and confirmed future bookings" },
+          { label: "Today's Bookings", value: todayBookings.length, note: "Your active bookings overlapping today" },
+        ].map((stat) => <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-sm font-semibold text-slate-500">{stat.label}</p><p className="mt-3 text-3xl font-bold text-slate-950">{stat.value}</p><p className="mt-1 text-xs text-slate-500">{stat.note}</p></div>)}
+      </section>
+      <section className="grid gap-5 xl:grid-cols-[1.55fr_0.8fr_0.72fr]">
+        <Panel title="Your Booking Activity">
+          <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-500"><span>Today · Sri Lanka time (UTC+05:30)</span><div className="flex gap-3"><span><b className="mr-1 inline-block size-2 rounded-full bg-blue-600" />Confirmed</span><span><b className="mr-1 inline-block size-2 rounded-full bg-blue-200" />Pending</span></div></div>
+          <BookingActivityChart points={bookingActivity(todayBookings, day.start)} />
+        </Panel>
+        <Panel title="Quick Actions"><div className="mt-4 space-y-2"><Link href="/reservations/new" className="flex h-11 items-center justify-between rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700">Book a Resource <span>→</span></Link><Link href="/resources" className="flex h-11 items-center rounded-lg bg-blue-50 px-4 text-sm font-semibold text-blue-700 hover:bg-blue-100">Browse Resources</Link><Link href="/reservations" className="flex h-11 items-center rounded-lg bg-slate-50 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-100">View My Reservations</Link></div></Panel>
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          {featured ? <><div className="h-32 bg-slate-100 bg-cover bg-center" style={{ backgroundImage: featured.image_url ? `url(${featured.image_url})` : undefined }} /><div className="p-4"><p className="text-xs font-semibold text-blue-600">Featured resource · {featured.type}</p><h3 className="mt-1 font-bold text-slate-950">{featured.name}</h3><p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{featured.description || "Explore availability and reserve this resource."}</p><Link href={`/reservations/new?resource=${featured.id}`} className="mt-4 inline-flex text-xs font-bold text-blue-600">Check availability →</Link></div></> : <div className="p-5"><h3 className="font-bold text-slate-950">Featured resource</h3><p className="mt-3 text-sm text-slate-500">No bookable resources right now.</p></div>}
         </section>
-
-        <section className="grid gap-5 xl:grid-cols-[1.55fr_0.8fr_0.72fr]">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between"><div><h3 className="font-bold text-slate-950">Resource Availability Overview</h3><p className="mt-1 text-xs text-slate-500">Today&apos;s booking activity across all resources</p></div><div className="flex gap-3 text-xs text-slate-500"><span><b className="mr-1 inline-block size-2 rounded-full bg-blue-600" />Booked</span><span><b className="mr-1 inline-block size-2 rounded-full bg-blue-100" />Available</span></div></div>
-            <div className="mt-6 flex h-40 items-end gap-3 border-b border-slate-100 px-2 sm:gap-6">
-              {[18, 36, 28, 56, 42, 70, 48, 30, 62, 24, 44, 20].map((height, index) => <div key={index} className="flex flex-1 items-end gap-1"><span className="w-1/2 rounded-t bg-blue-100" style={{ height: `${height}%` }} /><span className="w-1/2 rounded-t bg-blue-600" style={{ height: `${Math.max(8, height - (index % 3) * 14)}%` }} /></div>)}
-            </div>
-            <div className="mt-2 flex justify-between text-[10px] text-slate-400"><span>8 AM</span><span>10 AM</span><span>12 PM</span><span>2 PM</span><span>4 PM</span><span>6 PM</span><span>8 PM</span></div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="font-bold text-slate-950">Quick Actions</h3><div className="mt-4 space-y-2"><Link href="/reservations/new" className="flex h-11 items-center justify-between rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700">Book a Resource <span>→</span></Link><Link href="/resources" className="flex h-11 items-center rounded-lg bg-blue-50 px-4 text-sm font-semibold text-blue-800 hover:bg-blue-100">Browse Resources</Link><Link href="/reservations" className="flex h-11 items-center rounded-lg bg-slate-50 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-100">View My Reservations</Link></div></div>
-
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div className="h-32 bg-slate-100 bg-cover bg-center" style={{ backgroundImage: featuredResources?.[0]?.image_url ? `url(${featuredResources[0].image_url})` : "linear-gradient(135deg,#dbeafe,#f8fafc)" }} /><div className="p-4"><p className="text-xs font-semibold text-blue-600">Featured resource</p><h3 className="mt-1 font-bold text-slate-950">Find the Perfect Space</h3><p className="mt-1 text-xs leading-5 text-slate-500">Book meeting rooms, projectors and more for your team.</p><Link href="/resources" className="mt-4 inline-flex text-xs font-bold text-blue-600">Browse Resources →</Link></div></div>
-        </section>
-
-        <section className="grid gap-5 xl:grid-cols-[1.55fr_0.8fr_0.72fr]">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><h3 className="font-bold text-slate-950">Upcoming Reservations</h3><Link href="/reservations" className="text-xs font-bold text-blue-600">View all →</Link></div><div className="mt-3 divide-y divide-slate-100">{(upcomingReservations ?? []).slice(0, 3).map((reservation) => { const resource = Array.isArray(reservation.resources) ? reservation.resources[0] : reservation.resources; return <div key={reservation.id} className="flex items-center gap-3 py-3"><div className="size-11 shrink-0 rounded-lg bg-slate-100 bg-cover bg-center" style={{ backgroundImage: resource?.image_url ? `url(${resource.image_url})` : undefined }} /><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-slate-950">{resource?.name ?? "Reserved resource"}</p><p className="mt-1 text-xs text-slate-500">{formatDateTime(reservation.start_time)} · {resource?.type ?? "Resource"}</p></div><StatusBadge status={reservation.status} /></div>; })}</div>{!upcomingReservations?.length ? <p className="py-8 text-center text-sm text-slate-500">No upcoming reservations.</p> : null}</div>
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><h3 className="font-bold text-slate-950">Resource Categories</h3><Link href="/resources" className="text-xs font-bold text-blue-600">View all →</Link></div><div className="mt-4 space-y-1">{["Meeting Rooms", "Projectors", "Equipment", "Whiteboards"].map((category, index) => <Link href={`/resources?type=${encodeURIComponent(category)}`} key={category} className="flex items-center justify-between rounded-lg px-2 py-3 text-sm hover:bg-slate-50"><span className="font-semibold text-slate-700">{category}</span><span className="text-xs text-slate-400">{Math.max(1, (featuredResources?.length ?? 1) - index)} resources&nbsp; ›</span></Link>)}</div></div>
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><h3 className="font-bold text-slate-950">Today&apos;s Schedule</h3><Link href="/reservations" className="text-xs font-bold text-blue-600">View calendar →</Link></div><div className="mt-4 space-y-4">{(upcomingReservations ?? []).slice(0, 3).map((reservation) => { const resource = Array.isArray(reservation.resources) ? reservation.resources[0] : reservation.resources; return <div key={reservation.id} className="border-l-2 border-blue-500 pl-3"><p className="text-xs font-semibold text-slate-500">{new Intl.DateTimeFormat("en", { hour: "numeric", minute: "2-digit" }).format(new Date(reservation.start_time))}</p><p className="mt-1 text-sm font-bold text-slate-950">{resource?.name ?? "Booking"}</p><p className="text-xs text-slate-500">{resource?.type ?? "Resource"}</p></div>; })}</div></div>
-        </section>
-
-        <div className="flex flex-col gap-3 rounded-xl bg-blue-600 px-5 py-4 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold">Need a resource now?</p><p className="text-sm text-blue-100">Check availability and book in just a few clicks.</p></div><Link href="/reservations/new" className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-bold text-blue-700 hover:bg-blue-50">Book a Resource →</Link></div>
-      </div>
-    </AppShell>
-  );
+      </section>
+      <section className="grid gap-5 xl:grid-cols-[1.55fr_0.8fr_0.72fr]">
+        <Panel title="Upcoming Reservations" action={viewAll}><BookingList bookings={(upcomingResult.data ?? []) as Booking[]} empty="No upcoming reservations." /></Panel>
+        <Panel title="Resource Categories" action={<Link href="/resources" className="text-xs font-bold text-blue-600">View all →</Link>}><div className="mt-4 space-y-1">{categories.length ? categories.map((category) => <Link href={`/resources?type=${encodeURIComponent(category.type)}`} key={category.type} className="flex items-center justify-between gap-3 rounded-lg px-2 py-3 text-sm hover:bg-slate-50"><span className="font-semibold text-slate-700">{category.type}</span><span className="text-xs text-slate-500">{category.count} {category.count === 1 ? "resource" : "resources"} ›</span></Link>) : <p className="py-6 text-sm text-slate-500">No resources configured yet.</p>}</div></Panel>
+        <Panel title="Today's Schedule" action={viewAll}><BookingList bookings={todayBookings} empty="No bookings scheduled for today." /></Panel>
+      </section>
+      <div className="flex flex-col gap-3 rounded-xl bg-blue-600 px-5 py-4 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold">Need a resource now?</p><p className="text-sm text-blue-100">Check availability and book in just a few clicks.</p></div><Link href="/reservations/new" className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-bold text-blue-700 hover:bg-blue-50">Book a Resource →</Link></div>
+    </div>
+  </AppShell>;
 }
 
 export default function DashboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-screen items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <div className="size-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-            <p className="text-sm text-muted-foreground">
-              Loading dashboard...
-            </p>
-          </div>
-        </main>
-      }
-    >
-      <DashboardContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-background"><p className="text-sm text-muted-foreground">Loading dashboard...</p></main>}><DashboardContent /></Suspense>;
 }
