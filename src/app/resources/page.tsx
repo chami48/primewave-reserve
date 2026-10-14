@@ -10,8 +10,21 @@ async function ResourcesContent() {
   const result = await getResources();
 
   return (
-    <AppShell title="Resource Catalog">
-      <div className="mx-auto max-w-7xl">
+    <AppShell title="Resources">
+      <div className="mx-auto max-w-[1280px]">
+        <header className="mb-6">
+          <div>
+            <p className="text-sm font-medium text-slate-500">
+              Dashboard <span className="mx-2">›</span> Resources
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+              Resources
+            </h1>
+            <p className="mt-1 text-base text-slate-600">
+              Browse and book available meeting rooms, equipment and office resources.
+            </p>
+          </div>
+        </header>
         {result.success ? (
           <ResourceCatalog resources={result.data} />
         ) : (

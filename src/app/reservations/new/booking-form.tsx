@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Info,
   Loader2,
   Sparkles,
 } from "lucide-react";
@@ -222,35 +223,55 @@ export function BookingForm({ resources }: Props) {
   }
 
   return (
-    <form onSubmit={submitBooking} className="grid gap-6 xl:grid-cols-[300px_1fr_360px]">
-      <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form onSubmit={submitBooking} className="grid gap-6 xl:grid-cols-[360px_1fr_350px]">
+      <aside className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         {selectedResource ? (
           <div className="space-y-4">
+            <a href="/resources" className="inline-flex text-sm font-semibold text-blue-600">
+              ← Back to Resources
+            </a>
             <div
-              className="h-40 rounded-xl bg-slate-100 bg-cover bg-center"
+              className="relative h-52 rounded-xl bg-slate-100 bg-cover bg-center"
               style={{
                 backgroundImage: selectedResource.image_url
                   ? `url(${selectedResource.image_url})`
-                  : "linear-gradient(135deg, #ecfdf5, #e2e8f0)",
+                  : "linear-gradient(135deg, #dbeafe, #e0f2fe)",
               }}
               aria-label={`${selectedResource.name} image`}
-            />
+            >
+              <span className="absolute right-3 top-3 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-bold text-white shadow-lg">
+                Available
+              </span>
+            </div>
             <div>
-              <p className="text-sm font-semibold text-emerald-700">
-                {selectedResource.type}
-              </p>
-              <h2 className="mt-1 text-xl font-bold text-slate-950">
+              <h2 className="text-2xl font-bold text-slate-950">
                 {selectedResource.name}
               </h2>
             </div>
             <p className="text-sm leading-6 text-slate-600">
               {selectedResource.description || "No description provided."}
             </p>
-            <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-              Capacity:{" "}
-              <span className="font-semibold text-slate-950">
-                {selectedResource.capacity ?? "Not applicable"}
-              </span>
+            <div className="grid gap-3 border-t border-slate-100 pt-4 text-sm text-slate-700">
+              <p>
+                Capacity:{" "}
+                <span className="font-semibold text-slate-950">
+                  {selectedResource.capacity ?? "Not applicable"}
+                </span>
+              </p>
+              <p>Type: <span className="font-semibold">{selectedResource.type}</span></p>
+            </div>
+            <div className="rounded-xl bg-blue-50 p-4 text-sm text-slate-700">
+              <div className="flex gap-3">
+                <Info className="mt-0.5 size-5 shrink-0 text-blue-600" />
+                <div>
+                  <p className="font-bold text-slate-950">Good to know</p>
+                  <ul className="mt-1 list-disc pl-4 text-slate-600">
+                    <li>Please be on time for your reservation</li>
+                    <li>Cancel if you no longer need the room</li>
+                    <li>Keep the resource clean and organized</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -258,9 +279,9 @@ export function BookingForm({ resources }: Props) {
         )}
       </aside>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-emerald-600" />
+          <Sparkles className="size-4 text-blue-600" />
           <h2 className="text-lg font-semibold text-slate-950">Select date and time</h2>
         </div>
         <div className="mt-5 space-y-5">
@@ -270,7 +291,7 @@ export function BookingForm({ resources }: Props) {
               required
               value={resourceId}
               onChange={(event) => setResourceId(event.target.value)}
-              className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              className="premium-field mt-2 h-12 w-full rounded-xl px-3 text-sm"
             >
               {resources.map((resource) => (
                 <option key={resource.id} value={resource.id}>
@@ -288,7 +309,7 @@ export function BookingForm({ resources }: Props) {
                 type="date"
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
-                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="premium-field mt-2 h-12 w-full rounded-xl px-3 text-sm"
               />
             </label>
             <label className="block">
@@ -296,9 +317,11 @@ export function BookingForm({ resources }: Props) {
               <input
                 required
                 type="time"
+                step="60"
+                aria-label="Start time, selectable by minute"
                 value={startTime}
                 onChange={(event) => setStartTime(event.target.value)}
-                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="premium-field mt-2 h-12 w-full rounded-xl px-3 text-sm"
               />
             </label>
             <label className="block">
@@ -306,9 +329,11 @@ export function BookingForm({ resources }: Props) {
               <input
                 required
                 type="time"
+                step="60"
+                aria-label="End time, selectable by minute"
                 value={endTime}
                 onChange={(event) => setEndTime(event.target.value)}
-                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="premium-field mt-2 h-12 w-full rounded-xl px-3 text-sm"
               />
             </label>
           </div>
@@ -364,14 +389,14 @@ export function BookingForm({ resources }: Props) {
                     className={`relative h-12 rounded-xl border text-sm font-semibold transition ${
                       isSelected
                         ? "border-slate-950 bg-slate-950 text-white"
-                        : "border-slate-200 bg-white text-slate-800 hover:border-emerald-400"
+                        : "border-slate-200 bg-white text-slate-800 hover:border-blue-400"
                     } ${isPast ? "cursor-not-allowed opacity-40" : ""}`}
                   >
                     {calendarDay.getDate()}
                     {isBooked ? (
                       <span
                         className={`absolute bottom-1 left-1/2 size-1.5 -translate-x-1/2 rounded-full ${
-                          isSelected ? "bg-emerald-300" : "bg-red-500"
+                          isSelected ? "bg-blue-300" : "bg-red-500"
                         }`}
                       />
                     ) : null}
@@ -397,17 +422,21 @@ export function BookingForm({ resources }: Props) {
             </p>
           ) : null}
           {message ? (
-            <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <p className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
               {message}
             </p>
           ) : null}
+
+          <p className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            Choose any start and end time you need, then check availability before booking.
+          </p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
               onClick={checkAvailability}
               disabled={isPending}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:text-emerald-700 disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700 disabled:opacity-60"
             >
               {isPending ? <Loader2 className="size-4 animate-spin" /> : <Clock className="size-4" />}
               Check availability
@@ -415,7 +444,7 @@ export function BookingForm({ resources }: Props) {
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:bg-slate-300"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 transition hover:bg-blue-700 disabled:bg-slate-300"
             >
               {isPending ? <Loader2 className="size-4 animate-spin" /> : <CalendarCheck className="size-4" />}
               Submit booking
@@ -424,13 +453,13 @@ export function BookingForm({ resources }: Props) {
         </div>
       </section>
 
-      <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-950">Summary</h2>
+      <aside className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-950">Booking Summary</h2>
         {selectedResource ? (
           <div className="mt-5 space-y-4 text-sm text-slate-600">
             <div>
               <p className="font-semibold text-slate-950">{selectedResource.name}</p>
-              <p className="text-emerald-700">{selectedResource.type}</p>
+              <p className="text-blue-700">{selectedResource.type}</p>
             </div>
             <div className="rounded-xl bg-slate-50 p-4">
               <p>Date: {date || "Not selected"}</p>
@@ -443,7 +472,7 @@ export function BookingForm({ resources }: Props) {
               ) : slotsError ? (
                 <p className="mt-2 text-red-700">{slotsError}</p>
               ) : bookedSlots.length === 0 ? (
-                <p className="mt-2 text-emerald-700">No bookings for this date.</p>
+                <p className="mt-2 text-blue-700">No bookings for this date.</p>
               ) : (
                 <div className="mt-3 space-y-2">
                   {bookedSlots.map((slot) => (

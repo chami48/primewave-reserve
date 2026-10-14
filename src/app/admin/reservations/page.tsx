@@ -14,7 +14,7 @@ async function AdminReservationsContent() {
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
               PrimeWave Reserve Admin
             </p>
             <h1 className="mt-2 text-3xl font-bold text-slate-950">
@@ -28,13 +28,13 @@ async function AdminReservationsContent() {
           <div className="flex gap-3">
             <Link
               href="/admin/resources"
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-blue-200 hover:text-blue-700"
             >
               Resources
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-blue-700"
             >
               Dashboard
             </Link>

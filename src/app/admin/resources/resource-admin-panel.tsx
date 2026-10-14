@@ -155,7 +155,7 @@ export function ResourceAdminPanel({ resources }: Props) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="premium-panel rounded-2xl p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-950">
@@ -169,7 +169,7 @@ export function ResourceAdminPanel({ resources }: Props) {
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700"
+              className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
               aria-label="Cancel editing"
             >
               <X className="size-4" />
@@ -186,7 +186,7 @@ export function ResourceAdminPanel({ resources }: Props) {
               onChange={(event) =>
                 setForm((current) => ({ ...current, name: event.target.value }))
               }
-              className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
             />
           </label>
 
@@ -199,7 +199,7 @@ export function ResourceAdminPanel({ resources }: Props) {
               onChange={(event) =>
                 setForm((current) => ({ ...current, type: event.target.value }))
               }
-              className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
             />
             <datalist id="resource-types">
               {resourceTypes.map((type) => (
@@ -221,7 +221,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                 }))
               }
               rows={4}
-              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              className="premium-field mt-2 w-full rounded-xl px-3 py-3 text-sm"
             />
           </label>
 
@@ -236,7 +236,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                 aria-label="Selected resource image"
               />
             ) : null}
-            <label className="mt-2 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700">
+            <label className="mt-2 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700">
               {isUploading ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
@@ -287,7 +287,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                       : null,
                   }))
                 }
-                className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
               />
             </label>
 
@@ -301,7 +301,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                     status: event.target.value as ResourceStatus,
                   }))
                 }
-                className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="premium-field mt-2 h-11 w-full rounded-xl px-3 text-sm"
               >
                 <option value="available">Available</option>
                 <option value="maintenance">Maintenance</option>
@@ -315,7 +315,7 @@ export function ResourceAdminPanel({ resources }: Props) {
             </p>
           ) : null}
           {message ? (
-            <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            <p className="rounded-xl bg-blue-50 px-3 py-2 text-sm text-blue-700">
               {message}
             </p>
           ) : null}
@@ -323,7 +323,7 @@ export function ResourceAdminPanel({ resources }: Props) {
           <button
             type="submit"
             disabled={isPending || isUploading}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {editingId ? <Save className="size-4" /> : <Plus className="size-4" />}
             {isPending ? "Saving..." : editingId ? "Save changes" : "Add resource"}
@@ -331,7 +331,7 @@ export function ResourceAdminPanel({ resources }: Props) {
         </form>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="premium-panel rounded-2xl">
         <div className="border-b border-slate-100 p-5">
           <h2 className="text-lg font-semibold text-slate-950">
             Managed resources
@@ -370,7 +370,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         resource.status === "available"
-                          ? "bg-emerald-50 text-emerald-700"
+                          ? "bg-blue-50 text-blue-700"
                           : "bg-amber-50 text-amber-700"
                       }`}
                     >
@@ -394,7 +394,7 @@ export function ResourceAdminPanel({ resources }: Props) {
                       setError(null);
                       setMessage(null);
                     }}
-                    className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700"
+                    className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
                     aria-label={`Edit ${resource.name}`}
                   >
                     <Edit3 className="size-4" />

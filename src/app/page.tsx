@@ -1,69 +1,73 @@
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen overflow-hidden bg-[#f5f3ed] text-[#12212b]">
+      <div className="mx-auto flex min-h-screen max-w-[1480px] flex-col px-5 py-5 sm:px-8 lg:px-12">
+        <header className="flex items-center justify-between border-b border-[#12212b]/12 pb-5">
+          <Link href="/" className="flex items-center gap-3" aria-label="PrimeWave home">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-[#12212b] p-1.5">
+              <Image src="/primewave-lab-icon.png" alt="PrimeWave Lab" width={28} height={28} className="size-full object-contain" />
+            </span>
+            <span className="text-sm font-bold tracking-[0.18em] uppercase">
+              PrimeWave <span className="font-normal tracking-normal lowercase text-[#12212b]/55">reserve</span>
+            </span>
+          </Link>
+          <Link href="/login" className="text-sm font-semibold text-[#12212b]/70 hover:text-[#12212b]">
+            Sign in
+          </Link>
+        </header>
+
+        <section className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20 lg:py-20">
+          <div className="max-w-3xl">
+            <div className="mb-7 inline-flex rounded-full border border-[#2a9d8f]/30 bg-[#2a9d8f]/10 px-3 py-1.5 text-xs font-bold tracking-[0.14em] text-[#14776e] uppercase">
+              Calm, capable scheduling
+            </div>
+            <h1 className="max-w-3xl text-5xl font-semibold leading-[0.98] text-[#12212b] sm:text-7xl lg:text-[5.7rem]">
+              Make space for the work that matters.
+            </h1>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-[#12212b]/62 sm:text-xl">
+              PrimeWave gives your team one clear place to find, reserve, and manage the spaces and equipment that keep work moving.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-[#12212b]/62">
+              <span>Conflict-aware booking</span>
+              <span>Fast approvals</span>
+            </div>
+          </div>
+
+          <div className="relative lg:pl-10">
+            <div className="absolute -right-24 -top-20 size-72 rounded-full bg-[#e5a85b]/25 blur-3xl" />
+            <div className="relative border border-[#12212b]/12 bg-[#fffdfa] p-5 shadow-[0_24px_70px_rgba(18,33,43,0.10)] sm:p-7">
+              <div className="flex items-start justify-between border-b border-[#12212b]/10 pb-5">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.16em] text-[#12212b]/45 uppercase">Workspace access</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Where are you heading?</h2>
+                </div>
+                <span className="text-xs font-bold tracking-[0.16em] text-[#2a9d8f] uppercase">01 / 02</span>
+              </div>
+              <div className="mt-5 grid gap-3">
+                <Link href="/login?role=employee" className="group flex items-center gap-4 border border-[#12212b]/10 bg-[#f5f3ed] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#2a9d8f]/55 hover:bg-[#edf8f6]">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#2a9d8f]/12 text-xs font-bold text-[#14776e]">01</span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">Employee workspace</span><span className="mt-0.5 block text-sm text-[#12212b]/52">Find a room or book equipment</span></span>
+                </Link>
+                <Link href="/login?role=admin" className="group flex items-center gap-4 border border-[#12212b]/10 bg-[#12212b] p-4 text-left text-[#f5f3ed] transition hover:-translate-y-0.5 hover:bg-[#1d3543]">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e5a85b]/20 text-xs font-bold text-[#f0bd76]">02</span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">Admin console</span><span className="mt-0.5 block text-sm text-[#f5f3ed]/58">Oversee resources and approvals</span></span>
+                </Link>
+              </div>
+              <p className="mt-5 text-center text-xs text-[#12212b]/42">Secure access for every PrimeWave team</p>
+            </div>
+            <div className="absolute -bottom-8 -left-8 hidden size-24 rounded-full border border-[#e5a85b]/35 sm:block" />
+          </div>
+        </section>
+
+        <footer className="flex flex-col gap-3 border-t border-[#12212b]/12 pt-5 text-xs text-[#12212b]/45 sm:flex-row sm:items-center sm:justify-between">
+          <span>PrimeWave Reserve / Resource operations, made clear.</span>
+          <span>© 2026 PrimeWave</span>
+        </footer>
+      </div>
+    </main>
   );
 }

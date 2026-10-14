@@ -14,9 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PrimeWave Reserve — Smart Resource Booking",
+  title: {
+    default: "PrimeWave Reserve",
+    template: "%s | PrimeWave Reserve",
+  },
   description:
-    "Book and manage workspace resources effortlessly with PrimeWave Reserve. Browse rooms, equipment, and facilities in a clean guided flow.",
+    "A calm, capable workspace for resource booking, approvals, and operations.",
+  icons: {
+    icon: "/primewave-lab-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

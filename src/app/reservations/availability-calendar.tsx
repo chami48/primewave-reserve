@@ -142,7 +142,7 @@ export function AvailabilityCalendar({ resources }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="premium-panel rounded-2xl p-5">
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -157,7 +157,7 @@ export function AvailabilityCalendar({ resources }: Props) {
             <select
               value={resourceId}
               onChange={(event) => setResourceId(event.target.value)}
-              className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100"
+              className="premium-field h-11 rounded-xl px-3 text-sm font-semibold"
             >
               {resources.map((resource) => (
                 <option key={resource.id} value={resource.id}>
@@ -216,7 +216,7 @@ export function AvailabilityCalendar({ resources }: Props) {
                     className={`relative h-12 rounded-xl border text-sm font-bold transition ${
                       isSelected
                         ? "border-slate-950 bg-slate-950 text-white"
-                        : "border-slate-200 bg-white text-slate-800 hover:border-emerald-400"
+                        : "border-slate-200 bg-white text-slate-800 hover:border-blue-400"
                     }`}
                   >
                     {day.getDate()}
@@ -229,7 +229,7 @@ export function AvailabilityCalendar({ resources }: Props) {
                     ) : (
                       <span
                         className={`absolute bottom-1 left-1/2 h-1.5 w-5 -translate-x-1/2 rounded-full ${
-                          isSelected ? "bg-emerald-300" : "bg-emerald-500"
+                          isSelected ? "bg-blue-300" : "bg-blue-500"
                         } ${isToday ? "opacity-100" : "opacity-60"}`}
                       />
                     )}
@@ -246,11 +246,11 @@ export function AvailabilityCalendar({ resources }: Props) {
             style={{
               backgroundImage: selectedResource?.image_url
                 ? `url(${selectedResource.image_url})`
-                : "linear-gradient(135deg, #ecfdf5, #e2e8f0)",
+                : "linear-gradient(135deg, #dbeafe, #e0f2fe)",
             }}
           />
           <div className="mt-4">
-            <p className="text-sm font-semibold text-emerald-700">
+            <p className="text-sm font-semibold text-blue-700">
               {selectedResource?.type ?? "Resource"}
             </p>
             <h3 className="text-lg font-bold text-slate-950">
@@ -274,21 +274,21 @@ export function AvailabilityCalendar({ resources }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+              <p className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
                 Free day. No bookings found.
               </p>
             )}
           </div>
           <Link
             href={`/reservations/new?resource=${resourceId}`}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700"
+            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/15 hover:bg-blue-700"
           >
             <CalendarPlus className="size-4" />
             Book this resource
           </Link>
           <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-600">
             <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-5 rounded-full bg-emerald-500" />
+              <span className="h-1.5 w-5 rounded-full bg-blue-500" />
               Free
             </span>
             <span className="inline-flex items-center gap-2">

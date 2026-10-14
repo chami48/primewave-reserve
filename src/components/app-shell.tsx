@@ -1,22 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import {
-  CalendarCheck,
-  LayoutDashboard,
-  LibraryBig,
+  Bell,
+  ChevronDown,
   LogOut,
-  PackagePlus,
-  Settings,
-  Sparkles,
-  type LucideIcon,
+  Search,
 } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { MobileNav, type NavLinkData } from "@/components/mobile-nav";
+import { SidebarNav, type SidebarLink } from "@/components/sidebar-nav";
 
 type Props = {
   title: string;
@@ -24,37 +21,18 @@ type Props = {
   children: ReactNode;
 };
 
-type NavIconName =
-  | "LayoutDashboard"
-  | "LibraryBig"
-  | "PackagePlus"
-  | "CalendarCheck"
-  | "Settings";
-
-type ShellLink = {
-  href: string;
-  label: string;
-  iconName: NavIconName;
-};
-
-const iconMap: Record<NavIconName, LucideIcon> = {
-  LayoutDashboard,
-  LibraryBig,
-  PackagePlus,
-  CalendarCheck,
-  Settings,
-};
-
-const employeeLinks: ShellLink[] = [
+const employeeLinks: SidebarLink[] = [
   { href: "/dashboard", label: "Dashboard", iconName: "LayoutDashboard" },
   { href: "/resources", label: "Resources", iconName: "LibraryBig" },
   { href: "/reservations/new", label: "Book Resource", iconName: "PackagePlus" },
   { href: "/reservations", label: "My Reservations", iconName: "CalendarCheck" },
 ];
 
-const adminLinks: ShellLink[] = [
-  { href: "/admin/resources", label: "Admin Resources", iconName: "Settings" },
-  { href: "/admin/reservations", label: "Admin Reservations", iconName: "Settings" },
+const adminLinks: SidebarLink[] = [
+  { href: "/admin/dashboard", label: "Dashboard", iconName: "LayoutDashboard" },
+  { href: "/admin/resources", label: "Manage Resources", iconName: "Settings" },
+  { href: "/admin/reservations", label: "All Reservations", iconName: "Settings" },
+  { href: "/admin/users", label: "Users", iconName: "Settings" },
 ];
 
 function initials(name?: string | null, email?: string | null) {
@@ -92,7 +70,8 @@ export async function AppShell({
     .single();
 
   const isAdmin = profile?.role === "admin";
-  const links = isAdmin ? [...employeeLinks, ...adminLinks] : employeeLinks;
+  const links = isAdmin ? adminLinks : employeeLinks;
+  const brandHref = isAdmin ? "/admin/dashboard" : "/dashboard";
   const displayName = profile?.full_name || user.email;
   const avatarInitials = initials(profile?.full_name, user.email);
 
@@ -104,81 +83,70 @@ export async function AppShell({
   }));
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-[1440px]">
+    <main className="min-h-screen bg-[#f7fbff] text-foreground">
+      <div className="flex min-h-screen">
         {/* ─── Desktop Sidebar ─── */}
-        <aside className="hidden w-[280px] shrink-0 flex-col border-r border-border bg-sidebar px-5 py-6 lg:flex">
+        <aside className="hidden w-[244px] shrink-0 flex-col bg-[#071a33] px-4 py-7 text-white shadow-[22px_0_60px_rgba(7,26,51,0.20)] lg:flex">
           {/* Brand */}
           <Link
-            href="/dashboard"
+            href={brandHref}
             className="group flex items-center gap-3 px-1"
           >
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
-              <Sparkles className="size-4" />
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-white/8 transition-transform group-hover:scale-105">
+              <Image
+                src="/primewave-lab-icon.png"
+                alt="PrimeWave Lab"
+                width={32}
+                height={32}
+                className="size-8 object-contain"
+              />
             </span>
             <span>
-              <span className="block text-sm font-bold text-foreground tracking-tight">
-                PrimeWave
+              <span className="block text-xl font-bold tracking-tight text-white">
+                PrimeWave Lab
               </span>
-              <span className="block text-xs text-muted-foreground">
-                Reserve
-              </span>
+              <span className="block text-sm text-blue-100/72">Reserve</span>
             </span>
           </Link>
 
-          <Separator className="my-6" />
+          <Separator className="my-8 bg-white/10" />
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1">
-            {links.map((item) => {
-              const Icon = iconMap[item.iconName];
+          <SidebarNav links={links} />
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Icon className="size-4 shrink-0" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <Separator className="my-4" />
+          <Separator className="mb-4 bg-white/10" />
 
           {/* User Section at Bottom */}
-          <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-3">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+          <div className="flex items-center gap-3 px-2 py-2">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
               {avatarInitials}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">
+              <p className="truncate text-sm font-semibold text-white">
                 {displayName}
               </p>
-              <p className="text-xs capitalize text-muted-foreground">
+              <p className="text-xs capitalize text-blue-100/65">
                 {profile?.role ?? "user"}
               </p>
             </div>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-                aria-label="Sign out"
-              >
-                <LogOut className="size-4" />
-              </button>
-            </form>
+            <ChevronDown className="size-4 text-blue-100/70" />
           </div>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="mt-3 flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-blue-100/78 transition hover:bg-white/10 hover:text-white"
+            >
+              <LogOut className="size-5" />
+              Sign out
+            </button>
+          </form>
         </aside>
 
         {/* ─── Main Content Area ─── */}
         <section className="min-w-0 flex-1">
           {/* Header */}
-          <header className="sticky top-0 z-20 border-b border-border bg-background/80 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/92 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 {/* Mobile hamburger */}
                 <MobileNav
                   links={mobileLinks}
@@ -186,28 +154,48 @@ export async function AppShell({
                   role={profile?.role ?? "user"}
                   avatarInitials={avatarInitials}
                 />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                    {eyebrow}
-                  </p>
-                  <h1 className="mt-0.5 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                    {title}
-                  </h1>
+                <div className="relative hidden w-full max-w-[560px] md:block">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-500" />
+                  <input
+                    className="h-11 w-full rounded-xl border border-transparent bg-slate-100/90 pl-12 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    placeholder="Search resources, reservations..."
+                  />
                 </div>
               </div>
-              <div className="hidden items-center gap-3 sm:flex">
-                <Badge variant="secondary" className="capitalize">
-                  {profile?.role ?? "user"}
-                </Badge>
-                <span className="flex size-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              <div className="hidden items-center gap-4 sm:flex">
+                <button className="relative inline-flex size-10 items-center justify-center rounded-full text-slate-900 hover:bg-slate-100">
+                  <Bell className="size-5" />
+                  <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+                </button>
+                <span className="h-8 w-px bg-slate-200" />
+                <span className="flex size-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
                   {avatarInitials}
                 </span>
+                <span className="leading-tight">
+                  <span className="block text-sm font-bold text-slate-950">
+                    {displayName}
+                  </span>
+                  <span className="block text-xs capitalize text-slate-500">
+                    {profile?.role ?? "user"}
+                  </span>
+                </span>
+                <ChevronDown className="size-4 text-slate-700" />
               </div>
             </div>
           </header>
 
           {/* Page Content */}
-          <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          <div className="px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mb-5 md:hidden">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                {eyebrow}
+              </p>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+                {title}
+              </h1>
+            </div>
+            {children}
+          </div>
         </section>
       </div>
     </main>

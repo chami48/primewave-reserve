@@ -103,8 +103,19 @@ export async function login(formData: FormData) {
     redirect(`/login?error=${loginErrorCode(error)}`);
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase
+        .from("users")
+        .select("role")
+        .eq("auth_user_id", user.id)
+        .single()
+    : { data: null };
+
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(profile?.role === "admin" ? "/admin/dashboard" : "/dashboard");
 }
 
 export async function signup(formData: FormData) {

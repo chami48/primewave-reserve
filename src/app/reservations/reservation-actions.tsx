@@ -43,7 +43,7 @@ export function CancelReservationButton({
         {isPending ? <Loader2 className="size-4 animate-spin" /> : <Ban className="size-4" />}
         Cancel
       </button>
-      {message ? <p className="text-xs text-emerald-700">{message}</p> : null}
+      {message ? <p className="text-xs text-blue-700">{message}</p> : null}
       {error ? <p className="text-xs text-red-700">{error}</p> : null}
     </div>
   );

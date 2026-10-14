@@ -1,6 +1,8 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
+import { ArrowRight, CalendarDays, Command } from "lucide-react";
 import { signup } from "@/app/actions/auth";
 
 const errorMessages: Record<string, string> = {
@@ -29,37 +31,42 @@ async function RegisterNotice({
 
 export default function RegisterPage(props: PageProps<"/register">) {
   return (
-    <main className="grid min-h-screen bg-slate-50 lg:grid-cols-[1fr_520px]">
-      <section className="hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
+    <main className="primewave-bg grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="relative hidden overflow-hidden p-10 text-[#082044] lg:flex lg:flex-col lg:justify-between">
+        <div className="absolute inset-8 rounded-[2rem] bg-[url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center shadow-[0_30px_90px_rgba(15,23,42,0.18)]" />
+        <div className="absolute inset-8 rounded-[2rem] bg-gradient-to-r from-white/92 via-white/72 to-white/18" />
         <div className="flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-white text-sm font-bold text-slate-950">
-            PW
+          <span className="relative flex size-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/20">
+            <Command className="size-5" />
           </span>
-          <div>
+          <div className="relative">
             <p className="font-bold">PrimeWave Reserve</p>
-            <p className="text-sm text-slate-300">Resource Reservation Suite</p>
+            <p className="text-sm text-slate-600">Resource operations suite</p>
           </div>
         </div>
-        <div className="max-w-xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-300">
+        <div className="relative max-w-xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-600">
             Join your workspace
           </p>
-          <h1 className="mt-4 text-5xl font-bold tracking-tight">
+          <h1 className="mt-4 text-5xl font-semibold leading-[1.02]">
             Create bookings with visibility, approvals, and reliable conflict protection.
           </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-300">
+          <p className="mt-5 text-lg leading-8 text-slate-600">
             Employee accounts start with secure reservation access and administrator-reviewed booking workflows.
           </p>
         </div>
-        <p className="text-sm text-slate-400">New accounts are assigned the employee role.</p>
+        <p className="relative text-sm text-slate-500">New accounts are assigned the employee role.</p>
       </section>
 
-      <section className="flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold text-slate-900">
+      <section className="flex items-center justify-center p-5 sm:p-8">
+      <div className="premium-panel w-full max-w-md rounded-[1.75rem] p-7 sm:p-9">
+        <div className="flex items-center gap-2 text-sm font-bold tracking-[0.12em] text-blue-600 uppercase">
+          <CalendarDays className="size-4" /> Employee access
+        </div>
+        <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">
           Create your account
         </h1>
-        <p className="text-slate-500 mt-2 mb-8">
+        <p className="mt-2 mb-8 text-slate-500">
           Get started with PrimeWave Reserve.
         </p>
 
@@ -69,7 +76,7 @@ export default function RegisterPage(props: PageProps<"/register">) {
 
         <form action={signup} className="space-y-5">
           <div>
-            <label htmlFor="full_name" className="block text-sm font-medium mb-2">
+              <label htmlFor="full_name" className="mb-2 block text-sm font-semibold text-slate-800">
               Full Name
             </label>
             <input
@@ -77,13 +84,13 @@ export default function RegisterPage(props: PageProps<"/register">) {
               name="full_name"
               required
               maxLength={100}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900"
+              className="premium-field w-full rounded-xl px-4 py-3"
               placeholder="Your full name"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-800">
               Email Address
             </label>
             <input
@@ -92,38 +99,37 @@ export default function RegisterPage(props: PageProps<"/register">) {
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900"
+              className="premium-field w-full rounded-xl px-4 py-3"
               placeholder="you@company.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-800">
               Password
             </label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               required
               minLength={8}
               autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900"
+              className="premium-field w-full rounded-xl px-4 py-3"
               placeholder="Minimum 8 characters"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-700"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
           >
-            Create Account
+            Create Account <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500 mt-7">
+        <p className="mt-7 text-center text-sm text-slate-500">
           Already have an account?{" "}
-          <Link href="/login" className="text-emerald-600 font-semibold">
+          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
             Sign in
           </Link>
         </p>

@@ -95,20 +95,20 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm print:hidden">
+      <section className="premium-panel rounded-2xl p-4 print:hidden">
         <div className="grid gap-3 md:grid-cols-[1fr_220px_auto]">
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search resource, type, reservation id, user id"
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            className="premium-field h-11 rounded-xl px-3 text-sm"
           />
           <select
             value={status}
             onChange={(event) =>
               setStatus(event.target.value as "all" | ReservationStatus)
             }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            className="premium-field h-11 rounded-xl px-3 text-sm"
           >
             <option value="all">All statuses</option>
             <option value="pending">Pending</option>
@@ -118,14 +118,14 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
           <button
             type="button"
             onClick={downloadReport}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-blue-700"
           >
             <FileText className="size-4" />
             Download PDF
           </button>
         </div>
         {message ? (
-          <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          <p className="mt-3 rounded-xl bg-blue-50 px-3 py-2 text-sm text-blue-700">
             {message}
           </p>
         ) : null}
@@ -136,7 +136,7 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
         ) : null}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="premium-panel overflow-hidden rounded-2xl">
         <div className="hidden border-b border-slate-200 p-5 print:block">
           <h2 className="text-xl font-bold text-slate-950">
             PrimeWave Reserve Reservation Report
@@ -164,7 +164,7 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                       {reservation.resources?.type ?? "Resource"}
                     </span>
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                       {reservation.status}
                     </span>
                   </div>
@@ -185,7 +185,7 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
                       )
                     }
                     disabled={isPending && pendingId === reservation.id}
-                    className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:border-emerald-200 hover:text-emerald-700"
+                    className="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:border-blue-200 hover:text-blue-700"
                     aria-label={`Reservation actions for ${reservation.id}`}
                   >
                     <MoreHorizontal className="size-5" />
@@ -196,7 +196,7 @@ export function AdminReservationsPanel({ reservations, generatedAt }: Props) {
                       <button
                         type="button"
                         onClick={() => updateStatus(reservation.id, "confirmed")}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-blue-700 hover:bg-blue-50"
                       >
                         <CheckCircle2 className="size-4" />
                         Approve
